@@ -1,6 +1,7 @@
 # Infrastructure & Underlay as Code (`infra-core-iac`)
 
 ## Purpose & Scope
+
 This repository governs Layer 1 (Underlay) of the **Alcambic** Internal Developer Platform. It is strictly dedicated to bare-metal hypervisor configuration, OS-level security hardening, virtual networking topology, and infrastructure provisioning.
 
 By enforcing strict Separation of Duties (SoD), this repository forms an isolated security boundary. Application workloads and Kubernetes control plane operators have **zero write access** to these definitions, preventing lateral movement or unauthorized privilege escalation to the physical hypervisor layer.
