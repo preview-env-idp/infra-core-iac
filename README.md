@@ -11,7 +11,7 @@ By enforcing strict Separation of Duties (SoD), this repository forms an isolate
 infra-core-iac/
 ├── README.md
 ├── docs/
-│   ├── 01-architecture/       # Lokalne ADR-y dla pod warstwy sprzętowej (Underlay)
+│   ├── 01-architecture/       # Local ADRs for the physical hardware layer (Underlay)
 │   ├── 02-runbooks/           # Standard Operating Procedures, node bootstrapping, and recovery
 │   └── 03-security/           # Bare-metal storage limits, OS hardening baselines, and firewall rules
 ├── src/
