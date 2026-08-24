@@ -1,0 +1,26 @@
+name: Makefile Lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Validate Makefile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Install checkmake
+        run: go install github.com/mrtazz/checkmake/cmd/checkmake@latest
+
+      - name: Run checkmake
+        run: checkmake --config=.checkmake Makefile
