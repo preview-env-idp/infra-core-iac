@@ -45,3 +45,4 @@ terraform.rc
 
 # Local environment variables and secrets (NEVER COMMIT)
 .env
+src/ansible/group_vars/all/vault.yaml
