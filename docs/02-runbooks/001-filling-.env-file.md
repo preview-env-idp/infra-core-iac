@@ -8,8 +8,13 @@ Fill the .env file so that ansible scripts would know what to do exactly as you 
 
 ### 2.1 Copy .env.example file to .env
 
-Run in your terminal `cp .env.example .env` to copy example file with it's content co dedicated .env file.
+Create the actual .env file by copying the provided example.
+
+```bash
+cp .env.example .env
+```
 
 ### 2.2 Fill the gaps
 
-`PVE_NODE_01_IP` - static proxmox IP adress given in instalation. Ansible will use it to connect to the appropriate machine.
+Open src/ansible/group_vars/all/vault.yaml in your preferred text editor. You need to fill values with apriopriate data:
+* **`PVE_NODE_01_IP`**: static proxmox IP adress given in instalation. Ansible will use it to connect to the appropriate machine.

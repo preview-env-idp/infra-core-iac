@@ -1,0 +1,40 @@
+---
+- name: "Security Gate: Enforce minimum password length (driven by ADR-005)"
+  ansible.builtin.assert:
+    that:
+      - vault_alcambic_password | length >= 32
+    fail_msg: "[SECURITY FATAL] The vault_alcambic_password is less than 32 characters. This violates ADR-005 and renders the SHA-512 hash more vulnerable to GPU attacks."
+    success_msg: "[SECURITY OK] Password length meets the password length requirement."
+
+- name: "Local: Generate passphrase-less automation SSH key pair on localhost"
+  community.crypto.openssh_keypair:
+    path: "{{ lookup('env', 'HOME') }}/.ssh/id_ed25519_alcambic_m2m"
+    type: ed25519
+    comment: "alcambic-m2m-automation-key"
+    state: present
+  delegate_to: localhost
+  become: no
+  register: m2m_keypair
+
+- name: "User Management: Ensure primary group exists"
+  ansible.builtin.group:
+    name: alcambic
+    state: present
+
+- name: "User Management: Create alcambic operational service account"
+  ansible.builtin.user:
+    name: alcambic
+    group: alcambic
+    groups: sudo
+    append: yes
+    shell: /bin/bash
+    password: "{{ vault_alcambic_password | password_hash('sha512') }}"
+    state: present
+    create_home: yes
+
+- name: "SSH: Deploy automation public key with exclusive lock"
+  ansible.posix.authorized_key:
+    user: alcambic
+    state: present
+    key: "{{ m2m_keypair.public_key }}"
+    exclusive: yes
