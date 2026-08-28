@@ -17,4 +17,5 @@ cp .env.example .env
 ### 2.2 Fill the gaps
 
 Open src/ansible/group_vars/all/vault.yaml in your preferred text editor. You need to fill values with apriopriate data:
+
 * **`PVE_NODE_01_IP`**: static proxmox IP adress given in instalation. Ansible will use it to connect to the appropriate machine.

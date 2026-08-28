@@ -1,3 +1,4 @@
+---
 name: Makefile Lint
 
 on:
@@ -20,7 +21,7 @@ jobs:
           go-version: 'stable'
 
       - name: Install checkmake
-        run: go install github.com/mrtazz/checkmake/cmd/checkmake@latest
+        run: go install github.com/checkmake/checkmake/cmd/checkmake@latest
 
       - name: Run checkmake
         run: checkmake --config=.checkmake Makefile
