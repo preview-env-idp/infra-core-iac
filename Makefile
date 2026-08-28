@@ -15,4 +15,4 @@ bootstrap-pve:
 	@echo "Verifying cryptographic identity..."
 	@ssh-add -l >/dev/null || (echo "FATAL: No keys loaded in ssh-agent. Run first: ssh-add ~/.ssh/proxmox_ve" && exit 1)
 	@echo "Starting hypervisor hardening and DevBox creation on $(PVE_NODE_01_IP)..."
-	ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt
+	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt

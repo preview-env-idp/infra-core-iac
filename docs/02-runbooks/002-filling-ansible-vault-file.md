@@ -31,3 +31,11 @@ ansible-vault encrypt src/ansible/group_vars/all/vault.yaml --vault-id pve_core@
 ```
 
 To verify the file is successfully encrypted, you can run `cat src/ansible/group_vars/all/vault.yaml`. You should see the `$ANSIBLE_VAULT;1.2;AES256;pve_core` header instead of plaintext YAML.
+
+## 3. Decrypting the Vault
+
+If from some reason you would wish to decrypt vault file (for eg. to change some values) run:
+
+```bash
+ansible-vault decrypt src/ansible/group_vars/all/vault.yaml --vault-id pve_core@prompt
+```
