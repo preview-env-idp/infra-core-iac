@@ -1,0 +1,13 @@
+---
+extends: default
+
+rules:
+  line-length: disable
+
+  # Ansible heavily utilizes 'yes' and 'no' for boolean variables. 
+  truthy:
+    allowed-values:
+      - "true"
+      - "false"
+      - "yes"
+      - "no"
