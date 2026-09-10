@@ -13,6 +13,12 @@ help:
 # Day-0: Proxmox hardening and DevBox provisioning (Run ONLY from Operator's workstation)
 bootstrap-pve:
 	@echo "Verifying cryptographic identity..."
-	@ssh-add -l >/dev/null || (echo "FATAL: No keys loaded in ssh-agent. Run first: ssh-add ~/.ssh/proxmox_ve" && exit 1)
+	@if ssh-add -l >/dev/null 2>&1; then \
+		echo "[SECURITY OK] Cryptographic identity loaded and verified."; \
+	else \
+		echo "[SECURITY FATAL] Cryptographic identity not established (ssh-agent unavailable or empty)."; \
+		echo "Run first: eval \"\$$(ssh-agent -s)\" && ssh-add ~/.ssh/proxmox_ve"; \
+		exit 1; \
+	fi
 	@echo "Starting hypervisor hardening and DevBox creation on $(PVE_NODE_01_IP)..."
 	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt

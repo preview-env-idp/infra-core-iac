@@ -2,7 +2,7 @@
 - name: "Security Gate: Enforce minimum password length (driven by ADR-005)"
   ansible.builtin.assert:
     that:
-      - vault_alcambic_password | length >= 32
+      - vault_alcambic_password | default('') | length >= 32
     fail_msg: "[SECURITY FATAL] The vault_alcambic_password is less than 32 characters. This violates ADR-005 and renders the SHA-512 hash more vulnerable to GPU attacks."
     success_msg: "[SECURITY OK] Password length meets the password length requirement."
 
