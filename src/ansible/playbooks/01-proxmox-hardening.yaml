@@ -1,7 +1,6 @@
 ---
 - name: Day-0 Proxmox VE Bootstrap
   hosts: proxmox_cluster
-  gather_facts: yes
   remote_user: root
   become: no
   vars:
@@ -12,13 +11,8 @@
 
 - name: Day-0 Proxmox VE Configuration & Hardening
   hosts: proxmox_cluster
-  gather_facts: yes
 
-  tasks:
-    - name: "Smoke Test: Verify SSH connectivity and sudo escalation for service account"
-      ansible.builtin.ping:
-
-  # roles:
-  #   - networking
+  roles:
+    - networking
   #   - pve_firewall
   #   - secure_ssh

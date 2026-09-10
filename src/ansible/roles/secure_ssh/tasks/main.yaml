@@ -1,0 +1,27 @@
+---
+- name: "SSH Hardening: Enforce key-based authentication only"
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication"
+    line: "PasswordAuthentication no"
+    state: present
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart sshd
+
+- name: "SSH Hardening: Disable interactive authentications"
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^#?KbdInteractiveAuthentication"
+    line: "KbdInteractiveAuthentication no"
+    state: present
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart sshd
+
+- name: "SSH Hardening: Configure safe root login (Proxmox Cluster Requirement)"
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin prohibit-password"
+    state: present
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart sshd
