@@ -1,0 +1,7 @@
+---
+all:
+  children:
+    proxmox_cluster:
+      hosts:
+        pve-node-01:
+          ansible_host: "{{ lookup('env', 'PVE_NODE_01_IP') }}"

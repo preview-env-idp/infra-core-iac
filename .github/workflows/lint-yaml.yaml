@@ -1,0 +1,32 @@
+---
+name: YAML Lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Validate YAML
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Enforce .yaml extension strictness
+        run: |
+          YML_FILES=$(git ls-files '*.yml')
+          if [ -n "$YML_FILES" ]; then
+            echo "[FATAL] Found tracked files using the legacy '.yml' extension. Rename them to '.yaml':"
+            echo "$YML_FILES"
+            exit 1
+          fi
+          echo "[OK] No '.yml' files found."
+
+      - name: Install yamllint
+        run: sudo apt-get update && sudo apt-get install -y yamllint
+
+      - name: Run yamllint
+        run: yamllint .
