@@ -13,6 +13,6 @@
   hosts: proxmox_cluster
 
   roles:
-    - networking
+  #  - networking
   #   - pve_firewall
-  #   - secure_ssh
+    - secure_ssh
