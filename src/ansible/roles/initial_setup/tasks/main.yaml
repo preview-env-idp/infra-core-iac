@@ -15,6 +15,8 @@
         [SECURITY FATAL] The vault_alcambic_salt contains the default placeholder 'PASTE_GENERATED_SALT_HERE' and must be replaced with a generated salt.
       {% elif vault_alcambic_salt | default('') | length < 12 %}
         [SECURITY FATAL] The vault_alcambic_salt is less than 12 characters. This violates the minimum salt length security requirement.
+      {% else %}
+        [SECURITY FATAL] One or more security requirements were not met.
       {% endif %}
     success_msg: "[SECURITY OK] Variables meets security requirements."
 
