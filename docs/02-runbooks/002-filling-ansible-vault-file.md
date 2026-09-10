@@ -34,7 +34,7 @@ Once all variables are filled and the file is saved, encrypt it using Ansible Va
 ansible-vault encrypt src/ansible/inventory/group_vars/all/vault.yaml --vault-id pve_core@prompt
 ```
 
-To verify the file is successfully encrypted, you can run `cat src/ansible/group_vars/all/vault.yaml`. You should see the `$ANSIBLE_VAULT;1.2;AES256;pve_core` header instead of plaintext YAML.
+To verify the file is successfully encrypted, you can run `cat src/ansible/inventory/group_vars/all/vault.yaml`. You should see the `$ANSIBLE_VAULT;1.2;AES256;pve_core` header instead of plaintext YAML.
 
 ## 3. Decrypting the Vault
 
