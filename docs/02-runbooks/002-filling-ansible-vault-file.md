@@ -11,12 +11,12 @@ Initialize the Ansible Vault file from an example template, populate it with req
 Create the actual vault file by copying the provided example.
 
 ```bash
-cp src/ansible/group_vars/all/vault.example.yaml src/ansible/group_vars/all/vault.yaml
+cp src/ansible/inventory/group_vars/all/vault.example.yaml src/ansible/inventory/group_vars/all/vault.yaml
 ```
 
 ### 2.2. Fill the Secrets
 
-Open `src/ansible/group_vars/all/vault.yaml` in your preferred text editor. You need to replace the placeholder values with actual secrets.
+Open `src/ansible/inventory/group_vars/all/vault.yaml` in your preferred text editor. You need to replace the placeholder values with actual secrets.
 
 * **`vault_alcambic_password`**: The password for the automation service account.
   * *Requirement:* Must be at least 32 characters long.
@@ -31,7 +31,7 @@ Open `src/ansible/group_vars/all/vault.yaml` in your preferred text editor. You 
 Once all variables are filled and the file is saved, encrypt it using Ansible Vault IDs. You will be prompted to create a Master Password for the vault. **Store this Master Password securely.**
 
 ```bash
-ansible-vault encrypt src/ansible/group_vars/all/vault.yaml --vault-id pve_core@prompt
+ansible-vault encrypt src/ansible/inventory/group_vars/all/vault.yaml --vault-id pve_core@prompt
 ```
 
 To verify the file is successfully encrypted, you can run `cat src/ansible/group_vars/all/vault.yaml`. You should see the `$ANSIBLE_VAULT;1.2;AES256;pve_core` header instead of plaintext YAML.
@@ -41,5 +41,5 @@ To verify the file is successfully encrypted, you can run `cat src/ansible/group
 If from some reason you would wish to decrypt vault file (for eg. to change some values) run:
 
 ```bash
-ansible-vault decrypt src/ansible/group_vars/all/vault.yaml --vault-id pve_core@prompt
+ansible-vault decrypt src/ansible/inventory/group_vars/all/vault.yaml --vault-id pve_core@prompt
 ```
