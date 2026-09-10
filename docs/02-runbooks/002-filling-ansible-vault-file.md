@@ -20,7 +20,11 @@ Open `src/ansible/group_vars/all/vault.yaml` in your preferred text editor. You 
 
 * **`vault_alcambic_password`**: The password for the automation service account.
   * *Requirement:* Must be at least 32 characters long.
-  * *How to generate:* If you do not have a secure generation method, follow [infra-core-iac/runbook 003](./003-generating-random-string.md). Paste the generated string here.
+  * *How to generate:* If you do not have a secure generation method, follow [infra-core-iac/runbook 003](./003-generating-random-string.md). Paste the generated string *PASTE_GENERATED_PASSWORD_HERE*.
+
+* **`vault_alcaambic_salt`**: The salt for the provided password above.
+  * *Requirement:* Must be at least 12 characters long.
+  * *How to generate:* If you do not have a secure generation method, follow [infra-core-iac/runbook 003](./003-generating-random-string.md). Paste generated string replacing the *PASTE_GENERATED_SALT_HERE*.
 
 ### 2.3. Encrypt the Vault
 

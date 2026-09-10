@@ -15,7 +15,7 @@ We establish the following parameters for password hashing during Day-0/Day-1 pr
 
 * **Algorithm Selection:** We strictly mandate the use of `sha512` (via the Ansible `password_hash('sha512')` filter) for all OS-level passwords managed via IaC.
 * **Idempotency Enforcement:** We reject local shell workarounds. Password state evaluation must be natively handled by the Ansible `user` module to ensure zero configuration drift.
-* **Cryptographic Mitigation:** To offset SHA-512's lack of memory-hard protections (vulnerability to GPU-accelerated brute-force attacks), we mandate that the plaintext input password for the `alcambic` account must be a minimum of 32 characters, machine-generated via `/dev/urandom` (yielding >190 bits of entropy).
+* **Cryptographic Mitigation:** To offset SHA-512's lack of memory-hard protections (vulnerability to GPU-accelerated brute-force attacks), we mandate that the plaintext input password for the `alcambic` account must be a minimum of 32 characters, machine-generated via `/dev/urandom` (yielding >190 bits of entropy); also salt has to be minimum 12 charactes long.
 
 ## Consequences
 

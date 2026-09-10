@@ -1,10 +1,22 @@
 ---
-- name: "Security Gate: Enforce minimum password length (driven by ADR-005)"
+- name: "Security Gate: Enforce password and salt security requirements (driven by ADR-005)"
   ansible.builtin.assert:
     that:
       - vault_alcambic_password | default('') | length >= 32
-    fail_msg: "[SECURITY FATAL] The vault_alcambic_password is less than 32 characters. This violates ADR-005 and renders the SHA-512 hash more vulnerable to GPU attacks."
-    success_msg: "[SECURITY OK] Password length meets the password length requirement."
+      - vault_alcambic_password | default('') != 'PASTE_GENERATED_SALT_HERE'
+      - vault_alcambic_salt | default('') | length >= 12
+      - vault_alcambic_salt | default('') != 'PASTE_GENERATED_SALT_HERE'
+    fail_msg: |
+      {% if vault_alcambic_password | default('') == 'PASTE_GENERATED_SALT_HERE' %}
+        [SECURITY FATAL] The vault_alcambic_password contains the default placeholder 'PASTE_GENERATED_SALT_HERE' and must be replaced with a real password.
+      {% elif vault_alcambic_password | default('') | length < 32 %}
+        [SECURITY FATAL] The vault_alcambic_password is less than 32 characters. This violates ADR-005 and renders the SHA-512 hash more vulnerable to GPU attacks.
+      {% elif vault_alcambic_salt | default('') == 'PASTE_GENERATED_SALT_HERE' %}
+        [SECURITY FATAL] The vault_alcambic_salt contains the default placeholder 'PASTE_GENERATED_SALT_HERE' and must be replaced with a generated salt.
+      {% elif vault_alcambic_salt | default('') | length < 12 %}
+        [SECURITY FATAL] The vault_alcambic_salt is less than 12 characters. This violates the minimum salt length security requirement.
+      {% endif %}
+    success_msg: "[SECURITY OK] Variables meets security requirements."
 
 - name: "Local: Generate passphrase-less automation SSH key pair on localhost"
   community.crypto.openssh_keypair:
