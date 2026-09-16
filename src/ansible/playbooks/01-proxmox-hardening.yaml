@@ -14,5 +14,5 @@
 
   roles:
   #  - networking
-  #   - pve_firewall
+    - pve_firewall
     - secure_ssh
