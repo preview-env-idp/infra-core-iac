@@ -1,4 +1,18 @@
 ---
+- name: "Pre-flight check: Validate management_subnet_cidr"
+  ansible.builtin.assert:
+    that:
+      - management_subnet_cidr is defined
+      - management_subnet_cidr | length > 0
+      - management_subnet_cidr is regex('^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$')
+    fail_msg: >-
+      FATAL ERROR: 'management_subnet_cidr' is missing, empty, or incorrectly formatted.
+      Executing this playbook without a valid management subnet CIDR will lock you out 
+      of the Proxmox node due to default-deny rules.
+      Define it in 'inventory/group_vars/proxmox_cluster.yml' (e.g., '192.168.0.0/24').
+    success_msg: "Pre-flight check passed: Management network set to: {{ management_subnet_cidr }}"
+  run_once: true
+
 - name: "Datacenter firewall: Ensure [OPTIONS] section exists"
   ansible.builtin.lineinfile:
     path: /etc/pve/firewall/cluster.fw
@@ -33,12 +47,12 @@
     marker: "# {mark} ALCAMBIC MANAGED BLOCK - RULES"
     insertafter: "^\\[RULES\\]"
     block: |
-      IN ACCEPT -p tcp -dport 22 -log nolog # SSH (Ansible)
-      IN ACCEPT -p tcp -dport 8006 -log nolog # Proxmox WebGUI / API
-      IN ACCEPT -p tcp -dport 3128 -log nolog # SPICE Console Proxy
-      IN ACCEPT -p tcp -dport 111 -log nolog # rpcbind (Cluster RPC)
-      IN ACCEPT -p udp -dport 111 -log nolog # rpcbind (Cluster RPC)
-      IN ACCEPT -p icmp -log nolog # Ping & other ICMP traffic
+      IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 22 -log nolog # SSH (Ansible)
+      IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 8006 -log nolog # Proxmox WebGUI / API
+      IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 3128 -log nolog # SPICE Console Proxy
+      IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 111 -log nolog # rpcbind (Cluster RPC)
+      IN ACCEPT -source {{ management_subnet_cidr }} -p udp -dport 111 -log nolog # rpcbind (Cluster RPC)
+      IN ACCEPT -source {{ management_subnet_cidr }} -p icmp -log nolog # Ping & other ICMP traffic
 
       OUT ACCEPT -p udp -dport 53 -log nolog # DNS
       OUT ACCEPT -p tcp -dport 53 -log nolog # DNS
