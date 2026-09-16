@@ -52,6 +52,7 @@
   ansible.builtin.command: hostname
   register: proxmox_node_name
   changed_when: false
+  check_mode: false
   no_log: true
 
 - name: "Node firewall: Ensure [OPTIONS] section exists"
