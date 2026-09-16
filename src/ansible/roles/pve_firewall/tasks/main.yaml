@@ -1,0 +1,74 @@
+- name: "Datacenter firewall: Ensure [OPTIONS] section exists"
+  ansible.builtin.lineinfile:
+    path: /etc/pve/firewall/cluster.fw
+    line: "[OPTIONS]"
+    create: yes
+    insertbefore: BOF
+  run_once: true
+
+- name: "Datacenter firewall: Enforce strict zero-trust policies in [OPTIONS]"
+  ansible.builtin.lineinfile:
+    path: /etc/pve/firewall/cluster.fw
+    regexp: "^{{ item.key }}\\s*:"
+    line: "{{ item.key }}: {{ item.value }}"
+    insertafter: "^\\[OPTIONS\\]"
+  loop:
+    - { key: 'enable', value: '1' }
+    - { key: 'policy_in', value: 'DROP' }
+    - { key: 'policy_out', value: 'DROP' }
+    - { key: 'policy_forward', value: 'ACCEPT' }
+  run_once: true
+
+- name: "Datacenter firewall: Ensure [RULES] section exists"
+  ansible.builtin.lineinfile:
+    path: /etc/pve/firewall/cluster.fw
+    line: "[RULES]"
+    state: present
+  run_once: true
+
+- name: "Datacenter firewall: Inject ingress and egress rules"
+  ansible.builtin.blockinfile:
+    path: /etc/pve/firewall/cluster.fw
+    marker: "# {mark} ALCAMBIC MANAGED BLOCK - RULES"
+    insertafter: "^\\[RULES\\]"
+    block: |
+      IN ACCEPT -p tcp -dport 22 -log nolog # SSH (Ansible)
+      IN ACCEPT -p tcp -dport 8006 -log nolog # Proxmox WebGUI / API
+      IN ACCEPT -p tcp -dport 3128 -log nolog # SPICE Console Proxy
+      IN ACCEPT -p tcp -dport 111 -log nolog # rpcbind (Cluster RPC)
+      IN ACCEPT -p udp -dport 111 -log nolog # rpcbind (Cluster RPC)
+      IN ACCEPT -p icmp -log nolog # Ping & other ICMP traffic
+
+      OUT ACCEPT -p udp -dport 53 -log nolog # DNS
+      OUT ACCEPT -p tcp -dport 53 -log nolog # DNS
+      OUT ACCEPT -p udp -dport 123 -log nolog # NTP (Time Sync)
+      OUT ACCEPT -p tcp -dport 80 -log nolog # HTTP (APT repos)
+      OUT ACCEPT -p tcp -dport 443 -log nolog # HTTPS (APT / API calls)
+      OUT ACCEPT -p icmp -log nolog # Ping & other outgoing ICMP traffic
+  run_once: true
+
+- name: "Node firewall: Retrieve hostname"
+  ansible.builtin.command: hostname
+  register: proxmox_node_name
+  changed_when: false
+  no_log: true
+
+- name: "Node firewall: Ensure [OPTIONS] section exists"
+  ansible.builtin.lineinfile:
+    path: "/etc/pve/nodes/{{ proxmox_node_name.stdout }}/host.fw"
+    line: "[OPTIONS]"
+    create: yes
+    insertbefore: BOF
+
+- name: "Node firewall: Enable firewall on each node"
+  ansible.builtin.lineinfile:
+    path: "/etc/pve/nodes/{{ proxmox_node_name.stdout }}/host.fw"
+    regexp: "^enable\\s*:"
+    line: "enable: 1"
+    insertafter: "^\\[OPTIONS\\]"
+
+- name: "Service: Ensure pve-firewall daemon is running and enabled on boot"
+  ansible.builtin.systemd:
+    name: pve-firewall
+    state: started
+    enabled: yes
