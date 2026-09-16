@@ -1,3 +1,4 @@
+---
 - name: "Datacenter firewall: Ensure [OPTIONS] section exists"
   ansible.builtin.lineinfile:
     path: /etc/pve/firewall/cluster.fw
@@ -13,10 +14,10 @@
     line: "{{ item.key }}: {{ item.value }}"
     insertafter: "^\\[OPTIONS\\]"
   loop:
-    - { key: 'enable', value: '1' }
-    - { key: 'policy_in', value: 'DROP' }
-    - { key: 'policy_out', value: 'DROP' }
-    - { key: 'policy_forward', value: 'ACCEPT' }
+    - {key: 'enable', value: '1'}
+    - {key: 'policy_in', value: 'DROP'}
+    - {key: 'policy_out', value: 'DROP'}
+    - {key: 'policy_forward', value: 'ACCEPT'}
   run_once: true
 
 - name: "Datacenter firewall: Ensure [RULES] section exists"
