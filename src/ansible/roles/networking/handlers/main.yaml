@@ -1,0 +1,6 @@
+---
+- name: Reload network interfaces
+  ansible.builtin.command: ifreload -a
+  register: ifreload_result
+  failed_when: ifreload_result.rc != 0
+  changed_when: true

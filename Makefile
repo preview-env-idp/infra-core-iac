@@ -21,7 +21,7 @@ bootstrap-pve:
 		echo "Run first: eval \"\$$(ssh-agent -s)\" && ssh-add ~/.ssh/proxmox_ve"; \
 		exit 1; \
 	fi
-	@echo "Starting hypervisor hardening and DevBox creation on $(PVE_NODE_01_IP)..."
+	@echo "Starting Ansible..."
 	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt
 
 # Day-0: Dry-run check for Proxmox hardening

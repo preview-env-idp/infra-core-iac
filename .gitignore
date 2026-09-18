@@ -46,3 +46,4 @@ terraform.rc
 # Local environment variables and secrets (NEVER COMMIT)
 .env
 src/ansible/inventory/group_vars/all/vault.yaml
+src/ansible/inventory/group_vars/proxmox_cluster/vault.yaml

@@ -3,13 +3,12 @@
   ansible.builtin.assert:
     that:
       - management_subnet_cidr is defined
-      - management_subnet_cidr | length > 0
-      - management_subnet_cidr is regex('^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$')
+      - management_subnet_cidr | ansible.utils.ipaddr('net')
     fail_msg: >-
-      FATAL ERROR: 'management_subnet_cidr' is missing, empty, or incorrectly formatted.
+      FATAL ERROR: 'management_subnet_cidr' ({{ management_subnet_cidr | default('UNDEFINED') }}) is missing or invalid.
       Executing this playbook without a valid management subnet CIDR will lock you out 
-      of the Proxmox node due to default-deny rules.
       Define it in 'inventory/group_vars/proxmox_cluster.yml' (e.g., '192.168.0.0/24').
+      Execution aborted to prevent network lockout.
     success_msg: "Pre-flight check passed: Management network set to: {{ management_subnet_cidr }}"
   run_once: true
 
@@ -50,9 +49,13 @@
       IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 22 -log nolog # SSH (Ansible)
       IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 8006 -log nolog # Proxmox WebGUI / API
       IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 3128 -log nolog # SPICE Console Proxy
-      IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 111 -log nolog # rpcbind (Cluster RPC)
-      IN ACCEPT -source {{ management_subnet_cidr }} -p udp -dport 111 -log nolog # rpcbind (Cluster RPC)
       IN ACCEPT -source {{ management_subnet_cidr }} -p icmp -log nolog # Ping & other ICMP traffic
+      {% if groups['proxmox_cluster'] | length > 1 %}
+      IN ACCEPT -source {{ management_subnet_cidr }} -p udp -dport 5404:5405 -log nolog # Corosync
+      IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 60000:60050 -log nolog # Live Migration
+      {% endif %}
+      # IN ACCEPT -source {{ management_subnet_cidr }} -p tcp -dport 111 -log nolog # rpcbind (Cluster RPC)
+      # IN ACCEPT -source {{ management_subnet_cidr }} -p udp -dport 111 -log nolog # rpcbind (Cluster RPC)
 
       OUT ACCEPT -p udp -dport 53 -log nolog # DNS
       OUT ACCEPT -p tcp -dport 53 -log nolog # DNS
@@ -60,6 +63,10 @@
       OUT ACCEPT -p tcp -dport 80 -log nolog # HTTP (APT repos)
       OUT ACCEPT -p tcp -dport 443 -log nolog # HTTPS (APT / API calls)
       OUT ACCEPT -p icmp -log nolog # Ping & other outgoing ICMP traffic
+      {% if groups['proxmox_cluster'] | length > 1 %}
+      OUT ACCEPT -dest {{ management_subnet_cidr }} -p udp -dport 5404:5405 -log nolog # Corosync
+      OUT ACCEPT -dest {{ management_subnet_cidr }} -p tcp -dport 60000:60050 -log nolog # Live Migration
+      {% endif %}
   run_once: true
 
 - name: "Node firewall: Retrieve hostname"

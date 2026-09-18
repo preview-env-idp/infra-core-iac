@@ -1,0 +1,4 @@
+---
+# To change:
+vault_pve_alcambic_password: "PASTE_GENERATED_PASSWORD_HERE"
+vault_pve_alcambic_salt: "PASTE_GENERATED_SALT_HERE"
