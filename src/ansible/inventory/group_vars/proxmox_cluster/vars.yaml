@@ -2,6 +2,6 @@
 # To eventually change:
 dmz_bridge_comment: "Alcambic DMZ"
 # Don't change unless you know what you're doing:
-ansible_ssh_private_key_file: "{{ lookup('env', 'HOME') }}/.ssh/id_ed25519_alcambic_m2m"
+ansible_ssh_private_key_file: "{{ '~' | expanduser }}/.ssh/id_ed25519_alcambic_m2m"
 ansible_become_password: "{{ vault_pve_alcambic_password }}"
 dmz_bridge_name: "{{ lookup('env', 'PVE_DMZ_BRIDGE_NAME') }}"
