@@ -1,9 +1,4 @@
 ---
-- name: "Networking: Cleanup legacy DMZ bridge config from interfaces.d"
-  ansible.builtin.file:
-    path: "/etc/network/interfaces.d/{{ dmz_bridge_name }}.cfg"
-    state: absent
-
 - name: "Networking: Ensure DMZ bridge is configured in main interfaces file"
   ansible.builtin.blockinfile:
     path: /etc/network/interfaces
