@@ -9,5 +9,5 @@
     path: /etc/network/interfaces
     marker: "# {mark} ALCAMBIC MANAGED BLOCK - DMZ BRIDGE"
     insertbefore: "^source /etc/network/interfaces.d/.*"
-    block: "{{ lookup('ansible.builtin.template', 'dmz_bridge.cfg.j2') }}"
+    block: "{{ lookup('ansible.builtin.template', 'dmz_bridge.cfg.j2') + '\n' }}"
   notify: Reload network interfaces
