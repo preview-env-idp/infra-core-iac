@@ -20,4 +20,4 @@ Open src/ansible/group_vars/all/vault.yaml in your preferred text editor. You ne
 
 * **`PVE_NODE_01_IP`**: static proxmox IP adress given in instalation. Ansible will use it to connect to the appropriate machine.
 
-* **`PVE_DMZ_BRIDGE_NAME`**: name of proxmox bridge that will be created to make DMZ to prevent potential intrusion from machines that will be created by developers. Don't have to be changed unless you already have such bridge or wish to make it on bridge named other.
+* **`PVE_DMZ_BRIDGE_NAME`** (optional): name of proxmox bridge that will be created to make DMZ to prevent potential intrusion from machines that will be created by developers. Don't have to be changed unless you already have such bridge or wish to make it on bridge named other.

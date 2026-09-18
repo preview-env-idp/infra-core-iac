@@ -1,6 +1,4 @@
 ---
-# To change:
-management_subnet_cidr: ""
 # To eventually change:
 dmz_bridge_comment: "Alcambic DMZ"
 # Don't change unless you know what you're doing:
