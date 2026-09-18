@@ -7,7 +7,7 @@
 - name: "Networking: Ensure DMZ bridge is configured in main interfaces file"
   ansible.builtin.blockinfile:
     path: /etc/network/interfaces
-    marker: "# {mark} ALCAMBIC MANAGED BLOCK - DMZ BRIDGE ({{ dmz_bridge_name }})"
-    insertafter: EOF
+    marker: "# {mark} ALCAMBIC MANAGED BLOCK - DMZ BRIDGE"
+    insertbefore: "^source /etc/network/interfaces.d/.*"
     block: "{{ lookup('ansible.builtin.template', 'dmz_bridge.cfg.j2') }}"
   notify: Reload network interfaces
