@@ -1,16 +1,13 @@
 ---
-- name: "Networking: Ensure interfaces.d inclusion in main interfaces file"
-  ansible.builtin.lineinfile:
-    path: /etc/network/interfaces
-    line: "source /etc/network/interfaces.d/*"
-    state: present
-    insertafter: EOF
+- name: "Networking: Cleanup legacy DMZ bridge config from interfaces.d"
+  ansible.builtin.file:
+    path: "/etc/network/interfaces.d/{{ dmz_bridge_name }}.cfg"
+    state: absent
 
-- name: "Networking: Ensure DMZ bridge is configured in network interfaces"
-  ansible.builtin.template:
-    src: dmz_bridge.cfg.j2
-    dest: "/etc/network/interfaces.d/{{ dmz_bridge_name }}.cfg"
-    owner: root
-    group: root
-    mode: '0644'
+- name: "Networking: Ensure DMZ bridge is configured in main interfaces file"
+  ansible.builtin.blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} ALCAMBIC MANAGED BLOCK - DMZ BRIDGE ({{ dmz_bridge_name }})"
+    insertafter: EOF
+    block: "{{ lookup('ansible.builtin.template', 'dmz_bridge.cfg.j2') }}"
   notify: Reload network interfaces
