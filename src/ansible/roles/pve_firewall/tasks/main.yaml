@@ -3,7 +3,7 @@
   ansible.builtin.assert:
     that:
       - management_subnet_cidr is defined
-      - management_subnet_cidr | ansible.utils.ipaddr('net')
+      - (management_subnet_cidr | ansible.utils.ipaddr('net')) != false
     fail_msg: >-
       FATAL ERROR: 'management_subnet_cidr' ({{ management_subnet_cidr | default('UNDEFINED') }}) is missing or invalid.
       Executing this playbook without a valid management subnet CIDR will lock you out 
