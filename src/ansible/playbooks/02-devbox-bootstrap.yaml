@@ -1,0 +1,36 @@
+---
+- name: Day-0 Phase 2.1 - Provision DevBox KVM on Proxmox
+  hosts: proxmox_cluster
+  tags: [provision]
+  roles:
+    - role: pve_cloudinit_template
+      vars:
+        # to be developed
+    - role: devbox_provisioning
+      delegate_to: localhost
+      vars:
+        # to be developed
+
+- name: Day-0 Phase 2.2 - Wait for DevBox SSH
+  hosts: localhost
+  tags: [wait]
+  tasks:
+    - name: Wait for DevBox to listen on port 22
+      ansible.builtin.wait_for:
+        host: "{{ hostvars['devbox_01']['ansible_host'] }}"
+        port: 22
+        state: started
+        delay: 10
+        timeout: 120
+
+- name: Day-0 Phase 2.3 - DevBox Configuration & Tooling
+  hosts: devbox_01
+  tags: [configure]
+  roles:
+    - role: secure_ssh
+    - role: devbox_packages
+      vars:
+        # to be developed
+    - role: opentofu_setup
+      vars:
+        # to be developed

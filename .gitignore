@@ -47,3 +47,6 @@ terraform.rc
 .env
 src/ansible/inventory/group_vars/all/vault.yaml
 src/ansible/inventory/group_vars/proxmox_cluster/vault.yaml
+src/ansible/inventory/group_vars/management_plane/vault.yaml
+proxmox_api_token.txt
+proxmox_api_token_tofu.txt

@@ -1,0 +1,103 @@
+---
+- name: "Api rbac: Fetch current Proxmox user list"
+  ansible.builtin.command: pveum user list --output-format json
+  register: raw_user_list
+  changed_when: false
+
+- name: "Api rbac: Fetch current Proxmox ACLs"
+  ansible.builtin.command: pveum acl list --output-format json
+  register: raw_acl_list
+  changed_when: false
+
+- name: "Api rbac: Parse existing user state"
+  ansible.builtin.set_fact:
+    user_exists: >-
+      {{ (raw_user_list.stdout | from_json) | selectattr('userid', 'equalto', rbac_user) | list | length > 0 }}
+    existing_roles: >-
+      {{ (raw_acl_list.stdout | from_json) | selectattr('ugid', 'equalto', rbac_user) | selectattr('path', 'equalto', '/') | map(attribute='role') | list }}
+
+- name: "Api rbac: Create API user: {{ rbac_user }}"
+  ansible.builtin.command: pveum user add {{ rbac_user }} -comment "{{ rbac_comment }}"
+  when: not user_exists
+
+- name: "Api rbac: Assign missing RBAC permissions for: {{ rbac_user }}"
+  ansible.builtin.command: pveum acl modify / -user {{ rbac_user }} -role {{ item }}
+  loop: "{{ rbac_roles }}"
+  when: item not in existing_roles
+
+- name: "Api rbac: Fetch existing tokens for {{ rbac_user }}"
+  ansible.builtin.command: pveum user token list {{ rbac_user }} --output-format json
+  register: raw_token_list
+  changed_when: false
+
+- name: "Api rbac: Parse Token State"
+  ansible.builtin.set_fact:
+    pve_token_exists: >-
+      {{ (raw_token_list.stdout | from_json) | selectattr('tokenid', 'equalto', rbac_token_name) | list | length > 0 }}
+    vault_token_exists: "{{ rbac_vaulted_token | length > 0 }}"
+
+- name: "Api rbac: Active Token Validation against Proxmox API"
+  ansible.builtin.uri:
+    url: "https://{{ ansible_host }}:8006/api2/json/access/permissions"
+    method: GET
+    headers:
+      Authorization: "PVEAPIToken={{ rbac_user }}!{{ rbac_token_name }}={{ rbac_vaulted_token }}"
+    validate_certs: false
+    status_code: [200, 401]
+  register: token_test_auth
+  when: pve_token_exists and vault_token_exists
+  delegate_to: localhost
+  become: false
+  changed_when: false
+
+- name: "Api rbac: Determine Final Token State (Vault vs API Validity)"
+  ansible.builtin.set_fact:
+    token_valid_and_synced: >-
+      {{ pve_token_exists and vault_token_exists and (token_test_auth.status | default(0) == 200) }}
+
+- name: "Api rbac: Delete orphaned token from Proxmox due to state drift"
+  ansible.builtin.command: pveum user token remove {{ rbac_user }} {{ rbac_token_name }}
+  when: pve_token_exists and not token_valid_and_synced
+
+- name: "Api rbac: Generate API token '{{ rbac_token_name }}'"
+  ansible.builtin.command: pveum user token add {{ rbac_user }} {{ rbac_token_name }} --privsep 0 --output-format json
+  register: new_token_raw
+  when: not token_valid_and_synced
+
+- name: "Api rbac: Extract full token secret value"
+  ansible.builtin.set_fact:
+    new_token_secret: "{{ (new_token_raw.stdout | from_json).value }}"
+  when: not token_valid_and_synced
+
+- name: "Api rbac: Save plaintext token locally for Operator"
+  ansible.builtin.copy:
+    content: "{{ {rbac_vault_var_name: new_token_secret} | to_yaml }}"
+    dest: "{{ rbac_secret_dest }}"
+    mode: '0600'
+  delegate_to: localhost
+  become: false
+  when: not token_valid_and_synced
+
+- name: "Halt Execution: Operator Action Required"
+  ansible.builtin.fail:
+    msg: |
+      [SECURITY HALT] A new Proxmox API Token was generated because it was missing or invalid in your Vault.
+      The plaintext secret has been temporarily saved to: {{ rbac_secret_dest }}
+      
+      ACTION REQUIRED BEFORE PROCEEDING:
+      1. Decrypt appropriate vault file using:
+         ansible-vault decrypt {{ rbac_vault_dest }} --vault-id pve_core@prompt
+      2. Open the decrypted vault file. Locate the existing variable '{{ rbac_vault_var_name }}' 
+         and REPLACE the entire line with the exact contents of {{ rbac_secret_dest }}.
+         If it does not exist, simply paste the content at the end of the file.
+      3. Encrypt the vault file again using:
+         ansible-vault encrypt {{ rbac_vault_dest }} --vault-id pve_core@prompt
+      4. Delete the plaintext file: 
+         rm {{ rbac_secret_dest }}
+      5. Re-run ansible to proceed.
+  when: not token_valid_and_synced
+
+- name: "Api rbac: Confirm cryptographic state"
+  ansible.builtin.debug:
+    msg: "[SECURITY OK] Proxmox API Token '{{ rbac_token_name }}' is valid, synchronized with Vault, and ready for using."
+  when: token_valid_and_synced

@@ -1,0 +1,34 @@
+---
+# ==============================================================================
+# ROLE API CONTRACT: pve_api_rbac
+# ==============================================================================
+# This file defines the default interface for the Proxmox RBAC role.
+# Override these variables in your playbook or inventory when necessary.
+
+# 1. Proxmox User Configuration
+rbac_user: "alcambic-provisioner@pve"
+rbac_comment: "Automated API account managed by Ansible (Alcambic project)"
+
+# 2. RBAC Permissions (List of Proxmox Roles to apply at cluster root '/')
+rbac_roles:
+  - PVEVMAdmin
+  - PVEDatastoreUser
+  - PVESDNAdmin
+
+# 3. Token Configuration
+rbac_token_name: "default_token"
+
+# 4. GitOps & Vault Integration
+# Path where the plaintext token will be temporarily saved for the Operator.
+# MUST BE IN .gitignore when project is beeing created!
+rbac_secret_dest: "./proxmox_api_token.txt"
+
+# Path to the Ansible Vault file where the Operator should paste the encrypted token.
+rbac_vault_dest: "src/ansible/inventory/group_vars/proxmox_cluster/vault.yaml"
+
+# The literal string name of the variable inside the Vault file.
+rbac_vault_var_name: "vault_pve_api_token"
+
+# The actual plaintext/decrypted value from the Vault (used to detect State Drift).
+# By default, we use an empty string to force token generation if it's missing.
+rbac_vaulted_token: ""
