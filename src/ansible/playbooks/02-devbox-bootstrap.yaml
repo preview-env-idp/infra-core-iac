@@ -1,17 +1,29 @@
 ---
-- name: Day-0 Phase 2.1 - Provision DevBox KVM on Proxmox
+- name: "Day-0 Phase 2.1 - Provision Templates & DevBox KVM on Proxmox"
   hosts: proxmox_cluster
+  run_once: true
+  vars_files:
+    - ../../../infrastructure_matrix.yaml
   tags: [provision]
-  roles:
-    - role: pve_cloudinit_template
+  tasks:
+    - name: "Build Cloud-Init templates for defined architectures"
+      ansible.builtin.include_role:
+        name: pve_cloudinit_template
       vars:
-        # to be developed
-    - role: devbox_provisioning
+        host_arch: "{{ item.key }}"
+        template_vmid: "{{ item.value.vmid }}"
+        template_storage_pool: "{{ storage_pool_type }}"
+      loop: "{{ pve_base_templates | dict2items }}"
+      when: item.value.vmid is defined
+
+    - name: "Provision DevBox"
+      ansible.builtin.include_role:
+        name: devbox_provisioning
       delegate_to: localhost
       vars:
         # to be developed
 
-- name: Day-0 Phase 2.2 - Wait for DevBox SSH
+- name: "Day-0 Phase 2.2 - Wait for DevBox SSH"
   hosts: localhost
   tags: [wait]
   tasks:
@@ -23,7 +35,7 @@
         delay: 10
         timeout: 120
 
-- name: Day-0 Phase 2.3 - DevBox Configuration & Tooling
+- name: "Day-0 Phase 2.3 - DevBox Configuration & Tooling"
   hosts: devbox_01
   tags: [configure]
   roles:

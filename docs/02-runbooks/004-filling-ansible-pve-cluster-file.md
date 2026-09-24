@@ -12,3 +12,5 @@ Open `src/ansible/inventory/group_vars/proxmox_cluster/vars.yaml` in your prefer
 
 * **`dmz_bridge_comment`** (optional): The comment of the proxmox brigde wich will be shown in your GUI - how it will be named is realised by `PVE_BRIGDE_NAME` in .env file.
   * *How to fill:* If you want to change it just type something alse instead of existing value.
+
+* **`storage_pool_type`** (optional): Type of the storage system on proxmox. Chnage it if storage system on your proxmox is other than default.

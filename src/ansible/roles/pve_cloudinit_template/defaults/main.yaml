@@ -1,0 +1,44 @@
+---
+# ==============================================================================
+# ROLE CONTRACT: pve_cloudinit_template
+# ==============================================================================
+# This file defines the default configuration for the immutable base image template.
+# Target VM resources (RAM, CPU, IP) may be overridden dynamically during the
+# Linked Clone provisioning process.
+
+# 1. Virtual Machine Identifiers
+# We use a high ID registry (9000+) for templates to avoid collisions with
+# other nodes (which typically start at 100+).
+template_vmid: 9000
+template_vm_name: "debian-13-cloudinit{{ host_arch }}"
+
+# 2. Base Hardware Specification
+# Minimal viable compute resources required just to boot the kernel.
+# These may be overwritten upon cloning.
+template_vm_cores: 2
+template_vm_memory: 2048
+
+# CRITICAL: Setting CPU to "host" passes physical CPU flags (e.g., AES-NI) to the VM.
+# This is mandatory for cryptographic performance.
+template_vm_cpu_type: "host"
+
+# 3. I/O and Storage Subsystem
+# The default underlay network bridge.
+template_vm_network_bridge: "vmbr0"
+
+# CRITICAL: Must be an LVM-Thin or ZFS pool. Standard directory/ext4 storage
+# DOES NOT support instantaneous snapshots and Linked Clones.
+template_storage_pool: "local-lvm"
+
+# 4. Upstream Artifact Verification (GitOps Source of Truth)
+# The absolute path to the Debian cloud image registry. If you want to bump
+# the OS version (e.g., to Debian 14), update these variables.
+# Ansible will automatically detect the hash drift and rebuild the template.
+template_upstream_base_url: "https://cloud.debian.org/images/cloud/trixie/latest"
+template_upstream_filename: "debian-13-genericcloud-{{ host_arch }}.qcow2"
+
+# 5. Host architecture
+# The architecture of the host node. This is used to select the correct upstream
+# image for the template.
+
+host_arch: "amd64"

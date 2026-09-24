@@ -1,6 +1,7 @@
 ---
 # To eventually change:
 dmz_bridge_comment: "Alcambic DMZ"
+storage_pool_type: "local-lvm"
 # Don't change unless you know what you're doing:
 alcambic_m2m_key_path: "{{ '~' | expanduser }}/.ssh/id_ed25519_alcambic_m2m"
 ansible_ssh_private_key_file: "{{ alcambic_m2m_key_path }}"
