@@ -1,3 +1,4 @@
 ---
 # To change:
 management_subnet_cidr: ""
+management_subnet_gateway: ""

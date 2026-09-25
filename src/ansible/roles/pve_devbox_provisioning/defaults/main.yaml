@@ -1,0 +1,50 @@
+---
+# ==============================================================================
+# ROLE CONTRACT: devbox_provisioning
+# ==============================================================================
+# This file defines the default configuration for the DevBox KVM provisioning.
+# DevBox acts as the bootstrap node for the cluster, running OpenTofu
+# and managing the rest of the infrastructure lifecycle.
+# Override empty string ("") variables in your playbook or inventory.
+
+# 1. Target Proxmox Node & Credentials
+# The API user and token ID used to authenticate against the Proxmox cluster.
+devbox_api_user: "alcambic-provisioner@pve"
+devbox_api_token_id: "devbox"
+# The secret token. This MUST be injected securely via Ansible Vault.
+devbox_api_token_secret: ""
+
+# 2. Network Identity
+# Static IP assignment, Gateway and mask (in short notation - like 24).
+devbox_ip: ""
+devbox_gw_ip: ""
+devbox_net_mask: ""
+# The underlay network bridge to attach the DevBox to.
+devbox_net_bridge: "vmbr0"
+# The public SSH key injected via Cloud-Init for ssh access.
+devbox_ssh_pubkey: ""
+
+# 3. Hardware & Template Specification
+# The VM name and target architecture template to clone from.
+devbox_name: "alcambic-devbox"
+# Target template VMID (e.g., 9000). Should be mapped dynamically.
+devbox_template_id: ""
+# Compute resources allocated to the DevBox.
+devbox_cores: 2
+devbox_memory: 2048
+
+# 4. Storage Subsystem & Cloning Behavior
+# Determines whether to perform a full byte-by-byte clone or a linked clone.
+# CRITICAL: Leave as 'false' (Linked Clone) ONLY if your template resides on a
+# storage pool that supports instantaneous snapshots (local-lvm, ZFS, Ceph).
+# If you are using standard NFS or ext4 directory storage, you MUST override
+# this to 'true' in your inventory or playbook, otherwise the API will reject the request.
+devbox_full_clone: false
+
+# 5. Accountability
+devbox_ci_user: "alcambic"
+# The plain-text password for the Cloud-Init user (used for console access and sudo).
+# This MUST be injected securely via Ansible Vault.
+devbox_ci_password: ""
+# The salt used for hashing the Cloud-Init password. This MUST be injected securely via Ansible Vault.
+devbox_ci_salt: ""

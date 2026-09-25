@@ -1,0 +1,116 @@
+---
+# Checking for required variables and dependencies.
+- name: "DevBox: Input Validation (Fail-Fast)"
+  ansible.builtin.assert:
+    that:
+      - devbox_ip | length > 0
+      - devbox_net_mask | length > 0
+      - devbox_gw_ip | length > 0
+      - devbox_ssh_pubkey | length > 0
+      - devbox_template_id | string | length > 0
+      - devbox_api_token_secret | length > 0
+    fail_msg: |
+      [CONFIGURATION FATAL] Missing required provisioning variables.
+      Ensure 'devbox_ip', 'devbox_net_mask', 'devbox_gw_ip', 'devbox_ssh_pubkey', 
+      'devbox_template_id', and 'devbox_api_token_secret' are explicitly defined.
+    success_msg: "[CONFIGURATION OK] All mandatory variables present."
+  delegate_to: localhost
+  run_once: true
+
+- name: "DevBox: Ensure Python REST dependencies exist on Ansible Controller"
+  ansible.builtin.command: python3 -c "import proxmoxer, requests"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  run_once: true
+  ignore_errors: true
+  register: python_deps_check
+
+- name: "DevBox: Verify proxmoxer and requests are installed"
+  ansible.builtin.assert:
+    that: 
+      - python_deps_check.rc == 0
+    fail_msg: |
+      [DEPENDENCY FATAL] The 'proxmoxer' and/or 'requests' Python libraries are missing.
+      Please install them via your system's package manager or pip.
+    quiet: true
+  run_once: true
+
+# Main provisioning tasks for the DevBox KVM instance.
+- name: "DevBox: Dynamically fetch physical Proxmox node name"
+  ansible.builtin.command: hostname
+  delegate_to: "{{ inventory_hostname }}"
+  register: pve_raw_hostname
+  changed_when: false
+  become: false
+
+- name: "DevBox: Set resolved node name"
+  ansible.builtin.set_fact:
+    pve_node_hostname: "{{ pve_raw_hostname.stdout }}"
+
+- name: "PVE API: Query cluster for existing VMs"
+  ansible.builtin.uri:
+    url: "https://{{ ansible_host }}:8006/api2/json/cluster/resources?type=vm"
+    method: GET
+    headers:
+      Authorization: "PVEAPIToken={{ devbox_api_user }}!{{ devbox_api_token_id }}={{ devbox_api_token_secret }}"
+    validate_certs: false
+    return_content: true
+  register: cluster_resources
+  delegate_to: localhost
+  become: false
+  changed_when: false
+
+- name: "PVE API: Parse response to check if {{ devbox_name }} exists"
+  ansible.builtin.set_fact:
+    existing_devbox: >-
+      {{ (cluster_resources.json.data | selectattr('name', 'equalto', devbox_name) | list | first) | default(none) }}
+
+- name: "PVE API: Retrieve next available VMID from cluster if missing"
+  ansible.builtin.uri:
+    url: "https://{{ ansible_host }}:8006/api2/json/cluster/nextid"
+    method: GET
+    headers:
+      Authorization: "PVEAPIToken={{ devbox_api_user }}!{{ devbox_api_token_id }}={{ devbox_api_token_secret }}"
+    validate_certs: false
+    return_content: true
+  register: next_vmid_response
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  when: existing_devbox is none
+
+- name: "DevBox: Resolve final target VMID"
+  ansible.builtin.set_fact:
+    resolved_vmid: >-
+      {{ existing_devbox.vmid if existing_devbox is not none else next_vmid_response.json.data }}
+
+- name: "DevBox: Provision KVM Instance (ID: {{ resolved_vmid }}) via REST API"
+  community.general.proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ devbox_api_user }}"
+    api_token_id: "{{ devbox_api_token_id }}"
+    api_token_secret: "{{ devbox_api_token_secret }}"
+    validate_certs: false
+    node: "{{ pve_node_hostname }}"
+    name: "{{ devbox_name }}"
+    vmid: "{{ resolved_vmid }}"
+    clone: "{{ devbox_template_id }}"
+    full_clone: "{{ devbox_full_clone }}"
+    cores: "{{ devbox_cores }}"
+    memory: "{{ devbox_memory }}"
+    agent: true
+    scsihw: virtio-scsi-pci
+    boot: c
+    bootdisk: scsi0
+    ciuser: "{{ devbox_ci_user }}"
+    cipassword: "{{ devbox_ci_password | password_hash('sha512', devbox_ci_salt) }}"
+    net:
+      net0: "virtio,bridge={{ devbox_net_bridge }}"
+    ipconfig:
+      ipconfig0: "ip={{ devbox_ip }}/{{ devbox_net_mask }},gw={{ devbox_gw_ip }}"
+    sshkeys: "{{ devbox_ssh_pubkey }}"
+    state: started
+    update: true
+  delegate_to: localhost
+  become: false

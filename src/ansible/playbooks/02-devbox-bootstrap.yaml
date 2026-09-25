@@ -16,16 +16,56 @@
       loop: "{{ pve_base_templates | dict2items }}"
       when: item.value.vmid is defined
 
+    - name: "Ensure DevBox M2M SSH key pair exists locally"
+      community.crypto.openssh_keypair:
+        path: "{{ hostvars['devbox_01']['alcambic_devbox_m2m_key_path'] }}"
+        type: ed25519
+        comment: "alcambic-devbox-m2m"
+      delegate_to: localhost
+      become: false
+
+    - name: "Detect physical architecture of the target Proxmox node"
+      ansible.builtin.command: uname -m
+      register: pve_raw_arch
+      changed_when: false
+      become: false
+
+    - name: "Map physical architecture to template naming convention"
+      ansible.builtin.set_fact:
+        devbox_target_arch: >-
+          {%- if pve_raw_arch.stdout in ['x86_64', 'amd64'] -%}amd64
+          {%- elif pve_raw_arch.stdout in ['aarch64', 'arm64'] -%}arm64
+          {%- else -%}unsupported{%- endif -%}
+
+    - name: "Validate cluster hardware architecture compatibility"
+      ansible.builtin.assert:
+        that:
+          - devbox_target_arch != 'unsupported'
+          - devbox_target_arch in pve_base_templates.keys()
+        fail_msg: |
+          [ARCHITECTURE FATAL] The target Proxmox node reported an unsupported CPU architecture: '{{ pve_raw_arch.stdout }}'.
+          This cluster automation strictly supports: {{ pve_base_templates.keys() | list | join(', ') }}.
+      delegate_to: localhost
+      run_once: true
+
     - name: "Provision DevBox"
       ansible.builtin.include_role:
         name: devbox_provisioning
       delegate_to: localhost
       vars:
-        # to be developed
+        devbox_ip: "{{ hostvars['devbox_01']['ansible_host'] }}"
+        devbox_net_mask: "{{ management_subnet_cidr | split('/') | last }}"
+        devbox_gw_ip: "{{ management_subnet_gateway }}"
+        devbox_ssh_pubkey: "{{ lookup('file', hostvars['devbox_01']['alcambic_devbox_m2m_key_path'] ~ '.pub') }}"
+        devbox_template_id: "{{ pve_base_templates[devbox_target_arch].vmid }}"
+        devbox_api_token_secret: "{{ vault_pve_api_tofu_token }}"
+        devbox_ci_password: "{{ hostvars['devbox_01']['vault_devbox_alcambic_password'] }}"
+        devbox_ci_salt: "{{ hostvars['devbox_01']['vault_devbox_alcambic_salt'] }}"
 
 - name: "Day-0 Phase 2.2 - Wait for DevBox SSH"
   hosts: localhost
   tags: [wait]
+  become: false
   tasks:
     - name: Wait for DevBox to listen on port 22
       ansible.builtin.wait_for:

@@ -47,12 +47,12 @@ check-bootstrap-pve:
 # Day-0 Phase 2: DevBox provisioning and configuration
 bootstrap-devbox:
 	@echo "Starting Ansible (Phase 2: DevBox Provisioning)..."
-	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/02-devbox-bootstrap.yaml --vault-id pve_core@prompt
+	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/02-devbox-bootstrap.yaml --vault-id pve_core@prompt --vault-id management_plane@prompt
 	@echo "Phase 2 completed."
 
 # Day-0 Phase 2: Dry-run check for DevBox provisioning and configuration
 check-bootstrap-devbox:
 	@echo "DRY RUN: Checking DevBox provisioning."
 	@echo "Starting Ansible (Phase 2: DevBox Provisioning) in check mode..."
-	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/02-devbox-bootstrap.yaml --vault-id pve_core@prompt --check --diff
+	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/02-devbox-bootstrap.yaml --vault-id pve_core@prompt --vault-id management_plane@prompt --check --diff
 	@echo "Phase 2 check completed."
