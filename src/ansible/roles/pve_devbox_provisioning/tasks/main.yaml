@@ -103,6 +103,7 @@
     scsihw: virtio-scsi-pci
     boot: c
     bootdisk: scsi0
+    onboot: true
     ciuser: "{{ devbox_ci_user }}"
     cipassword: "{{ devbox_ci_password | password_hash('sha512', devbox_ci_salt) }}"
     net:

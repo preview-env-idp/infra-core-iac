@@ -11,7 +11,9 @@
 - name: "Day-0 Phase 1.2: Proxmox VE Configuration & Hardening"
   hosts: proxmox_cluster
   roles:
-    - secure_ssh
+    - role: secure_ssh
+      vars:
+        ssh_permit_root_login: "prohibit-password"
     - pve_firewall
     - networking
     - role: pve_api_rbac
