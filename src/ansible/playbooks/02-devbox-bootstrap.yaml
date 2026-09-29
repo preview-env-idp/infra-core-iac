@@ -29,6 +29,7 @@
       register: pve_raw_arch
       changed_when: false
       become: false
+      check_mode: false
 
     - name: "Map physical architecture to template naming convention"
       ansible.builtin.set_fact:
