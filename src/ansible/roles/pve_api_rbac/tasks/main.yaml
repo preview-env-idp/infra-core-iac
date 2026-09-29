@@ -31,6 +31,7 @@
   ansible.builtin.command: pveum user token list {{ rbac_user }} --output-format json
   register: raw_token_list
   changed_when: false
+  check_mode: false
 
 - name: "Api rbac: Parse Token State"
   ansible.builtin.set_fact:
