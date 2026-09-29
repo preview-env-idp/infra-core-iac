@@ -88,7 +88,7 @@
       {{ existing_devbox.vmid if existing_devbox is not none else next_vmid_response.json.data }}
 
 - name: "DevBox: Provision KVM Instance (ID: {{ resolved_vmid }}) via REST API"
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_host: "{{ ansible_host }}"
     api_user: "{{ devbox_api_user }}"
     api_token_id: "{{ devbox_api_token_id }}"
