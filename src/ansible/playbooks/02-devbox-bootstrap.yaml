@@ -79,10 +79,10 @@
   hosts: devbox_01
   tags: [configure]
   roles:
-    - role: secure_ssh
-    - role: devbox_packages
-      vars:
+    - secure_ssh
+    # - role: devbox_packages
+      # vars:
         # to be developed
-    - role: opentofu_setup
-      vars:
+    # - role: opentofu_setup
+      # vars:
         # to be developed
