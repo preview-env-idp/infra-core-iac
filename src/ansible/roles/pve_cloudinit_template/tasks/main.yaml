@@ -15,6 +15,7 @@
   register: template_status
   failed_when: false
   changed_when: false
+  check_mode: false
 
 - name: "CloudInit: Retrieve existing template configuration"
   ansible.builtin.command: qm config {{ template_vmid }}
