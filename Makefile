@@ -26,7 +26,7 @@ bootstrap-pve:
 	fi
 	@echo "Starting Ansible (Phase 1: Proxmox Hardening)..."
 	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt
-	@echo "Phase 1 completed. Triggering Phase 2: DevBox Provisioning..."
+	@echo "Phase 1 completed. Triggering Phase 2: DevBox Provisioning"
 	@$(MAKE) bootstrap-devbox
 
 # Day-0 Phase 1: Dry-run check for Proxmox hardening
@@ -42,7 +42,7 @@ check-bootstrap-pve:
 	@echo "DRY RUN: Checking hypervisor hardening."
 	@echo "Starting Ansible (Phase 1: Proxmox Hardening) in check mode..."
 	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt --check --diff
-	@echo "Phase 1 check completed. Triggering Phase 2 check: DevBox Provisioning..."
+	@echo "Phase 1 check completed. Triggering Phase 2 check: DevBox Provisioning"
 	@$(MAKE) check-bootstrap-devbox
 
 # Day-0 Phase 2: DevBox provisioning and configuration

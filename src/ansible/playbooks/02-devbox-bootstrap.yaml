@@ -51,7 +51,8 @@
     - name: "Provision DevBox"
       ansible.builtin.include_role:
         name: devbox_provisioning
-      delegate_to: localhost
+        apply:
+          delegate_to: localhost
       vars:
         devbox_ip: "{{ hostvars['devbox_01']['ansible_host'] }}"
         devbox_net_mask: "{{ management_subnet_cidr | split('/') | last }}"
