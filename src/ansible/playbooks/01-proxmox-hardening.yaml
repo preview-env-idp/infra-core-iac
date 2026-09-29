@@ -22,6 +22,6 @@
         rbac_user: "alcambic-tofu-provisioner@pve"
         rbac_comment: "Automated provisioning account for OpenTofu in Alcambic project"
         rbac_token_name: "devbox"
-        rbac_secret_dest: "./proxmox_api_token_tofu.txt"
+        rbac_secret_dest: "{{ playbook_dir }}/../../../proxmox_api_token_tofu.txt"
         rbac_vault_var_name: "vault_pve_api_tofu_token"
         rbac_vaulted_token: "{{ vault_pve_api_tofu_token | default('') }}"

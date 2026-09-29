@@ -88,19 +88,21 @@
       ansible.builtin.fail:
         msg: |
           [SECURITY HALT] A new Proxmox API Token was generated because it was missing or invalid in your Vault.
-          The plaintext secret has been temporarily saved to: {{ rbac_secret_dest }}
+          The plaintext secret has been temporarily saved to: {{ clean_secret_dest }}
           
           ACTION REQUIRED BEFORE PROCEEDING:
           1. Decrypt appropriate vault file using:
              ansible-vault decrypt {{ rbac_vault_dest }} --vault-id {{ rbac_vault_id }}
           2. Open the decrypted vault file. Locate the existing variable '{{ rbac_vault_var_name }}' 
-             and REPLACE the entire line with the exact contents of {{ rbac_secret_dest }}.
+             and REPLACE the entire line with the exact contents of {{ clean_secret_dest }}.
              If it does not exist, simply paste the content at the end of the file.
           3. Encrypt the vault file again using:
              ansible-vault encrypt {{ rbac_vault_dest }} --vault-id {{ rbac_vault_id }}
           4. Delete the plaintext file: 
-             rm {{ rbac_secret_dest }}
+             rm {{ clean_secret_dest }}
           5. Re-run ansible to proceed.
+      vars:
+        clean_secret_dest: "{{ rbac_secret_dest | realpath }}"
 
 - name: "Api rbac: Confirm cryptographic state"
   ansible.builtin.debug:
