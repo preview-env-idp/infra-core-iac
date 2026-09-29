@@ -25,6 +25,8 @@ rbac_secret_dest: "./proxmox_api_token.txt"
 
 # Path to the Ansible Vault file where the Operator should paste the encrypted token.
 rbac_vault_dest: "src/ansible/inventory/group_vars/proxmox_cluster/vault.yaml"
+# Name of the ansible vault ID to use when encrypting/decrypting the vault file.
+rbac_vault_id: "pve_core@prompt"
 
 # The literal string name of the variable inside the Vault file.
 rbac_vault_var_name: "vault_pve_api_token"
