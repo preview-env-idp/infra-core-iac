@@ -4,6 +4,7 @@
     url: "{{ template_upstream_base_url }}/SHA512SUMS"
     return_content: true
   register: upstream_checksums
+  check_mode: false
 
 - name: "CloudInit: Parse upstream SHA-512 hash in memory"
   ansible.builtin.set_fact:
@@ -20,6 +21,7 @@
   register: template_config
   when: template_status.rc == 0
   changed_when: false
+  check_mode: false
 
 - name: "CloudInit: Parse existing template hash from metadata"
   ansible.builtin.set_fact:
