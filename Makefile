@@ -2,6 +2,7 @@ include .env
 export
 
 .DEFAULT_GOAL := help
+MAKEFLAGS += --no-print-directory
 
 .PHONY: help bootstrap-pve check-bootstrap-pve bootstrap-devbox check-bootstrap-devbox
 
