@@ -16,7 +16,7 @@
     user_exists: >-
       {{ (raw_user_list.stdout | from_json) | selectattr('userid', 'equalto', rbac_user) | list | length > 0 }}
     existing_roles: >-
-      {{ (raw_acl_list.stdout | from_json) | selectattr('ugid', 'equalto', rbac_user) | selectattr('path', 'equalto', '/') | map(attribute='role') | list }}
+      {{ (raw_acl_list.stdout | from_json) | selectattr('ugid', 'equalto', rbac_user) | selectattr('path', 'equalto', '/') | map(attribute='roleid') | list }}
 
 - name: "Api rbac: Create API user: {{ rbac_user }}"
   ansible.builtin.command: pveum user add {{ rbac_user }} -comment "{{ rbac_comment }}"
