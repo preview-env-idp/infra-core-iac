@@ -22,9 +22,9 @@ help:
 # Check if the Ansible binary exists and if then if it is newer than the requirements file. If not, trigger the installation of dependencies.
 $(ANSIBLE_BIN):$(REQUIREMENTS)
 	@echo "[INIT] Bootstrapping isolated Python environment in $(VENV)..."
-	python3 -m venv $(VENV)
-	$(VENV)/bin/pip install --upgrade pip
-	$(VENV)/bin/pip install -r $(REQUIREMENTS)
+	@python3 -m venv $(VENV)
+	@$(VENV)/bin/pip install -q --upgrade pip
+	@$(VENV)/bin/pip install -q -r$(REQUIREMENTS)
 	@touch $(ANSIBLE_BIN)
 	@echo "[INIT] Dependencies installed successfully."
 
