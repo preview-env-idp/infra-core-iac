@@ -19,7 +19,7 @@
     - role: pve_api_rbac
       run_once: true
       vars:
-        rbac_user: "{{ pve_alcambic_tofu_user} }"
+        rbac_user: "{{ pve_alcambic_tofu_user }}"
         rbac_comment: "Automated provisioning account for OpenTofu in Alcambic project"
         rbac_token_name: "devbox"
         rbac_secret_dest: "{{ playbook_dir }}/../../../proxmox_api_token_tofu.txt"
