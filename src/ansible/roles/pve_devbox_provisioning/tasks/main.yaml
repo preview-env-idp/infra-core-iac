@@ -88,8 +88,7 @@
 
 - name: "DevBox: Resolve final target VMID"
   ansible.builtin.set_fact:
-    resolved_vmid: >-
-      {{ existing_devbox.vmid if existing_devbox is not none else next_vmid_response.json.data }}
+    resolved_vmid: "{{ existing_devbox.vmid if existing_devbox else next_vmid_response.json.data }}"
 
 - name: "DevBox: Provision KVM Instance (ID: {{ resolved_vmid }}) via REST API"
   community.proxmox.proxmox_kvm:
