@@ -19,8 +19,7 @@
 
 - name: "DevBox: Ensure Python REST dependencies exist on Ansible Controller"
   ansible.builtin.command: >
-    {{ ansible_play_python_interpreter | default(ansible_python_interpreter) | default('/usr/bin/python3') }}
-    -c 'import proxmoxer, requests'
+    {{ ansible_playbook_python }} -c 'import proxmoxer, requests'
   delegate_to: localhost
   become: false
   changed_when: false
@@ -35,7 +34,7 @@
       - python_deps_check.rc == 0
     fail_msg: |
       [DEPENDENCY FATAL] The 'proxmoxer' and/or 'requests' Python libraries are missing in the active Python environment.
-      Active interpreter: {{ ansible_play_python_interpreter | default(ansible_python_interpreter) | default('/usr/bin/python3') }}
+      Active interpreter: {{ ansible_playbook_python }}
       Ensure you are executing this role within the properly bootstrapped virtual environment (e.g., via 'make deps').
     quiet: true
   run_once: true
