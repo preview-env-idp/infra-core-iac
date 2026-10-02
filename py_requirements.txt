@@ -1,0 +1,4 @@
+ansible==14.4.0
+passlib==1.7.4
+proxmoxer==2.3.0
+requests==2.34.2
