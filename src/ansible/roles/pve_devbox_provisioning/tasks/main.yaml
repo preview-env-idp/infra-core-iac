@@ -102,7 +102,7 @@
     name: "{{ devbox_name }}"
     vmid: "{{ resolved_vmid }}"
     clone: "{{ devbox_template_id if existing_devbox is none else omit }}"
-    full_clone: "{{ devbox_full_clone if existing_devbox is none else omit }}"
+    full: "{{ devbox_full_clone if existing_devbox is none else omit }}"
     update: "{{ true if existing_devbox is not none else omit }}"
     cores: "{{ devbox_cores }}"
     memory: "{{ devbox_memory }}"
