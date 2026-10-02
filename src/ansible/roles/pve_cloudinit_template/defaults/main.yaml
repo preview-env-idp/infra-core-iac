@@ -10,7 +10,7 @@
 # We use a high ID registry (9000+) for templates to avoid collisions with
 # other nodes (which typically start at 100+).
 template_vmid: 9000
-template_vm_name: "debian-13-cloudinit{{ host_arch }}"
+template_vm_name: "alcambic-debian13-cloudinit-template-{{ host_arch }}"
 
 # 2. Base Hardware Specification
 # Minimal viable compute resources required just to boot the kernel.

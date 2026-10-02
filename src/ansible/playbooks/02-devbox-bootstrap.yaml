@@ -60,7 +60,7 @@
         devbox_net_mask: "{{ management_subnet_cidr | split('/') | last }}"
         devbox_gw_ip: "{{ management_subnet_gateway }}"
         devbox_ssh_pubkey: "{{ lookup('file', hostvars['devbox_01']['alcambic_devbox_m2m_key_path'] ~ '.pub') }}"
-        devbox_template_id: "{{ pve_base_templates[devbox_target_arch].vmid }}"
+        devbox_template_name: "alcambic-debian13-cloudinit-template-{{ devbox_target_arch }}"
         devbox_api_token_secret: "{{ vault_pve_api_tofu_token }}"
         devbox_ci_password: "{{ hostvars['devbox_01']['vault_devbox_alcambic_password'] }}"
         devbox_ci_salt: "{{ hostvars['devbox_01']['vault_devbox_alcambic_salt'] }}"

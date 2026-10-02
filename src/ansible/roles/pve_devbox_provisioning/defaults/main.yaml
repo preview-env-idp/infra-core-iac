@@ -27,8 +27,8 @@ devbox_ssh_pubkey: ""
 # 3. Hardware & Template Specification
 # The VM name and target architecture template to clone from.
 devbox_name: "alcambic-devbox"
-# Target template VMID (e.g., 9000). Should be mapped dynamically.
-devbox_template_id: ""
+# Target template name. Should be mapped dynamically.
+devbox_template_name: ""
 # Compute resources allocated to the DevBox.
 devbox_cores: 2
 devbox_memory: 2048

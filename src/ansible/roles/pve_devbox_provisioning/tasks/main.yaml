@@ -7,12 +7,12 @@
       - devbox_net_mask | length > 0
       - devbox_gw_ip | length > 0
       - devbox_ssh_pubkey | length > 0
-      - devbox_template_id | string | length > 0
+      - devbox_template_name | string | length > 0
       - devbox_api_token_secret | length > 0
     fail_msg: |
       [CONFIGURATION FATAL] Missing required provisioning variables.
       Ensure 'devbox_ip', 'devbox_net_mask', 'devbox_gw_ip', 'devbox_ssh_pubkey', 
-      'devbox_template_id', and 'devbox_api_token_secret' are explicitly defined.
+      'devbox_template_name', and 'devbox_api_token_secret' are explicitly defined.
     success_msg: "[CONFIGURATION OK] All mandatory variables present."
   delegate_to: localhost
   run_once: true
@@ -99,7 +99,7 @@
     node: "{{ pve_node_hostname }}"
     name: "{{ devbox_name }}"
     newid: "{{ resolved_vmid if (devbox_match | length == 0) else omit }}"
-    clone: "{{ devbox_template_id if (devbox_match | length == 0) else omit }}"
+    clone: "{{ devbox_template_name if (devbox_match | length == 0) else omit }}"
     full: "{{ devbox_full_clone if (devbox_match | length == 0) else omit }}"
     vmid: "{{ resolved_vmid if (devbox_match | length > 0) else omit }}"
     update: "{{ true if (devbox_match | length > 0) else omit }}"
