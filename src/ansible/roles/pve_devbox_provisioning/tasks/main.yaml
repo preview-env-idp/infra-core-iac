@@ -89,7 +89,7 @@
   ansible.builtin.set_fact:
     resolved_vmid: "{{ devbox_match[0].vmid if (devbox_match | length > 0) else next_vmid_response.json.data }}"
 
-- name: "DevBox: Provision KVM Instance (ID: {{ resolved_vmid }}) via REST API"
+- name: "DevBox: Phase 1 - Clone KVM from Template (Run only if missing)"
   community.proxmox.proxmox_kvm:
     api_host: "{{ ansible_host }}"
     api_user: "{{ devbox_api_user }}"
@@ -98,11 +98,24 @@
     validate_certs: false
     node: "{{ pve_node_hostname }}"
     name: "{{ devbox_name }}"
+    newid: "{{ resolved_vmid }}"
+    clone: "{{ devbox_template_name }}"
+    full: "{{ devbox_full_clone }}"
+    state: present
+  delegate_to: localhost
+  become: false
+  when: devbox_match | length == 0
+
+- name: "DevBox: Phase 2 - Configure & Start KVM Instance"
+  community.proxmox.proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ devbox_api_user }}"
+    api_token_id: "{{ devbox_api_token_id }}"
+    api_token_secret: "{{ devbox_api_token_secret }}"
+    validate_certs: false
+    node: "{{ pve_node_hostname }}"
     vmid: "{{ resolved_vmid }}"
-    newid: "{{ resolved_vmid if (devbox_match | length == 0) else omit }}"
-    clone: "{{ devbox_template_name if (devbox_match | length == 0) else omit }}"
-    full: "{{ devbox_full_clone if (devbox_match | length == 0) else omit }}"
-    update: "{{ true if (devbox_match | length > 0) else omit }}"
+    update: true
     cores: "{{ devbox_cores }}"
     memory: "{{ devbox_memory }}"
     agent: true
