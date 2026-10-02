@@ -31,7 +31,7 @@ Open `src/ansible/inventory/group_vars/management_plane/vault.yaml` in your pref
 Once all variables are filled and the file is saved, encrypt it using Ansible Vault IDs. You will be prompted to create a Master Password for the vault. **Store this Master Password securely.**
 
 ```bash
-ansible-vault encrypt src/ansible/inventory/group_vars/management_plane/vault.yaml --vault-id management_plane@prompt
+.venv/bin/ansible-vault encrypt src/ansible/inventory/group_vars/management_plane/vault.yaml --vault-id management_plane@prompt
 ```
 
 To verify the file is successfully encrypted, you can run `cat src/ansible/inventory/group_vars/management_plane/vault.yaml`. You should see the `$ANSIBLE_VAULT;1.2;AES256;management_plane` header instead of plaintext YAML.
@@ -41,5 +41,5 @@ To verify the file is successfully encrypted, you can run `cat src/ansible/inven
 If for some reason you would wish to decrypt the vault file (e.g., to change some values), run:
 
 ```bash
-ansible-vault decrypt src/ansible/inventory/group_vars/management_plane/vault.yaml --vault-id management_plane@prompt
+.venv/bin/ansible-vault decrypt src/ansible/inventory/group_vars/management_plane/vault.yaml --vault-id management_plane@prompt
 ```
