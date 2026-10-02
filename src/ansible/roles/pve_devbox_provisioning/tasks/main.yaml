@@ -98,9 +98,10 @@
     validate_certs: false
     node: "{{ pve_node_hostname }}"
     name: "{{ devbox_name }}"
-    vmid: "{{ resolved_vmid }}"
+    newid: "{{ resolved_vmid if (devbox_match | length == 0) else omit }}"
     clone: "{{ devbox_template_id if (devbox_match | length == 0) else omit }}"
     full: "{{ devbox_full_clone if (devbox_match | length == 0) else omit }}"
+    vmid: "{{ resolved_vmid if (devbox_match | length > 0) else omit }}"
     update: "{{ true if (devbox_match | length > 0) else omit }}"
     cores: "{{ devbox_cores }}"
     memory: "{{ devbox_memory }}"
