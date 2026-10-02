@@ -77,10 +77,29 @@
         state: started
         delay: 10
         timeout: 120
+      when: not ansible_check_mode
 
 - name: "Day-0 Phase 2.3 - DevBox Configuration & Tooling"
   hosts: devbox_01
   tags: [configure]
+  pre_tasks:
+    - name: "Connection Gate: Test SSH reachability"
+      ansible.builtin.ping:
+      ignore_unreachable: true
+      register: host_ping
+
+    - name: "Connection Gate: Gracefully end play if host is dead during Check Mode"
+      ansible.builtin.meta: end_host
+      when: 
+        - ansible_check_mode 
+        - host_ping.unreachable is defined and host_ping.unreachable
+
+    - name: "Connection Gate: Fail hard if host is dead during normal execution"
+      ansible.builtin.fail:
+        msg: "[PIPELINE FATAL] SSH connection failed. Phase 2.1 likely failed to boot the VM."
+      when: 
+        - not ansible_check_mode 
+        - host_ping.unreachable is defined and host_ping.unreachable
   roles:
     - secure_ssh
     # - role: devbox_packages
