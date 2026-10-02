@@ -6,7 +6,7 @@ MAKEFLAGS += --no-print-directory
 
 VENV := .venv
 ANSIBLE_BIN := $(VENV)/bin/ansible-playbook
-REQUIREMENTS := requirements.txt
+REQUIREMENTS := py_requirements.txt
 
 .PHONY: help deps verify-ssh bootstrap-pve check-bootstrap-pve bootstrap-devbox check-bootstrap-devbox
 
