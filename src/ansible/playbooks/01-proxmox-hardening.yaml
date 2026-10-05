@@ -16,6 +16,7 @@
         name: guestfs-tools
         state: present
         update_cache: true
+        install_recommends: false
   roles:
     - role: secure_ssh
       vars:
