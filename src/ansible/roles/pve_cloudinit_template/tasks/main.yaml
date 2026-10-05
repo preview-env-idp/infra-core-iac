@@ -12,8 +12,8 @@
       - virt_customize_check.rc == 0
     fail_msg: |
       [DEPENDENCY FATAL] 'virt-customize' command not found.
-      This tool is required to securely inject declarative network policies into Golden Images.
-      Ensure the 'libguestfs-tools' package is installed on the Proxmox cluster nodes.
+      This tool is required to securely inject declarative network policies into future templates.
+      Ensure the 'guestfs-tools' package is installed on the Proxmox cluster nodes.
   check_mode: false
 
 - name: "CloudInit: Fetch checksums manifest for upstream image"
