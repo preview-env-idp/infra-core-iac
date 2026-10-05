@@ -1,5 +1,5 @@
 ---
 pve_base_templates:
-  amd64: # amd64, x86_64, intel64 processors architecture types
+  amd64:  # amd64, x86_64, intel64 processors architecture types
     vmid: 9000
-  arm64: {} # arm64, aarch64 processors architecture types
+  arm64: {}  # arm64, aarch64 processors architecture types

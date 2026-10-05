@@ -6,7 +6,7 @@
       - (management_subnet_cidr | ansible.utils.ipaddr('net')) != false
     fail_msg: >-
       FATAL ERROR: 'management_subnet_cidr' ({{ management_subnet_cidr | default('UNDEFINED') }}) is missing or invalid.
-      Executing this playbook without a valid management subnet CIDR will lock you out 
+      Executing this playbook without a valid management subnet CIDR will lock you out
       Define it in 'inventory/group_vars/proxmox_cluster.yml' (e.g., '192.168.0.0/24').
       Execution aborted to prevent network lockout.
     success_msg: "Pre-flight check passed: Management network set to: {{ management_subnet_cidr }}"

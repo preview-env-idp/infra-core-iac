@@ -11,7 +11,7 @@
       - devbox_api_token_secret | length > 0
     fail_msg: |
       [CONFIGURATION FATAL] Missing required provisioning variables.
-      Ensure 'devbox_ip', 'devbox_net_mask', 'devbox_gw_ip', 'devbox_ssh_pubkey', 
+      Ensure 'devbox_ip', 'devbox_net_mask', 'devbox_gw_ip', 'devbox_ssh_pubkey',
       'devbox_template_name', and 'devbox_api_token_secret' are explicitly defined.
     success_msg: "[CONFIGURATION OK] All mandatory variables present."
   delegate_to: localhost
@@ -30,7 +30,7 @@
 
 - name: "DevBox: Verify proxmoxer and requests are installed"
   ansible.builtin.assert:
-    that: 
+    that:
       - python_deps_check.rc == 0
     fail_msg: |
       [DEPENDENCY FATAL] The 'proxmoxer' and/or 'requests' Python libraries are missing in the active Python environment.
