@@ -1,0 +1,6 @@
+auto {{ dmz_bridge_name }}
+iface {{ dmz_bridge_name }} inet manual
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+        # {{ dmz_bridge_comment }}

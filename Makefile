@@ -2,16 +2,35 @@ include .env
 export
 
 .DEFAULT_GOAL := help
+MAKEFLAGS += --no-print-directory
 
-.PHONY: help, bootstrap-pve
+VENV := .venv
+ANSIBLE_BIN := $(VENV)/bin/ansible-playbook
+REQUIREMENTS := py_requirements.txt
+
+.PHONY: help deps verify-ssh bootstrap-pve check-bootstrap-pve bootstrap-devbox check-bootstrap-devbox
 
 help:
 	@echo "Available targets:"
-	@echo "  help          - Show this help message"
-	@echo "  bootstrap-pve - Bootstrap Proxmox VE"
+	@echo "  help                   - Show this help message"
+	@echo "  deps                   - Trigger Python dependencies installation"
+	@echo "  bootstrap-pve          - Bootstrap Proxmox VE (Phase 1: Hardening) and trigger Phase 2"
+	@echo "  bootstrap-devbox       - Bootstrap DevBox VM (Phase 2: Provisioning & Tooling)"
+	@echo "  check-bootstrap-pve    - Dry-run for Bootstrap Proxmox VE"
+	@echo "  check-bootstrap-devbox - Dry-run for Bootstrap DevBox VM"
 
-# Day-0: Proxmox hardening and DevBox provisioning (Run ONLY from Operator's workstation)
-bootstrap-pve:
+# Check if the Ansible binary exists and if then if it is newer than the requirements file. If not, trigger the installation of dependencies.
+$(ANSIBLE_BIN):$(REQUIREMENTS)
+	@echo "[INIT] Bootstrapping isolated Python environment in $(VENV)..."
+	@python3 -m venv $(VENV)
+	@$(VENV)/bin/pip install -q --upgrade pip
+	@$(VENV)/bin/pip install -q -r$(REQUIREMENTS)
+	@touch $(ANSIBLE_BIN)
+	@echo "[INIT] Dependencies installed successfully."
+
+deps: $(ANSIBLE_BIN)
+
+verify-ssh:
 	@echo "Verifying cryptographic identity..."
 	@if ssh-add -l >/dev/null 2>&1; then \
 		echo "[SECURITY OK] Cryptographic identity loaded and verified."; \
@@ -20,5 +39,31 @@ bootstrap-pve:
 		echo "Run first: eval \"\$$(ssh-agent -s)\" && ssh-add ~/.ssh/proxmox_ve"; \
 		exit 1; \
 	fi
-	@echo "Starting hypervisor hardening and DevBox creation on $(PVE_NODE_01_IP)..."
-	@ANSIBLE_CONFIG=src/ansible/ansible.cfg ansible-playbook src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt
+
+# Day-0 Phase 1: Proxmox hardening
+bootstrap-pve: verify-ssh $(ANSIBLE_BIN)
+	@echo "Starting Ansible (Phase 1: Proxmox Hardening)..."
+	@ANSIBLE_CONFIG=src/ansible/ansible.cfg $(ANSIBLE_BIN) src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt
+	@echo "Phase 1 completed. Triggering Phase 2: DevBox Provisioning"
+	@$(MAKE) bootstrap-devbox
+
+# Day-0 Phase 1: Dry-run check for Proxmox hardening
+check-bootstrap-pve: verify-ssh $(ANSIBLE_BIN)
+	@echo "DRY RUN: Checking hypervisor hardening."
+	@echo "Starting Ansible (Phase 1: Proxmox Hardening) in check mode..."
+	@ANSIBLE_CONFIG=src/ansible/ansible.cfg $(ANSIBLE_BIN) src/ansible/playbooks/01-proxmox-hardening.yaml --vault-id pve_core@prompt --check --diff
+	@echo "Phase 1 check completed. Triggering Phase 2 check: DevBox Provisioning"
+	@$(MAKE) check-bootstrap-devbox
+
+# Day-0 Phase 2: DevBox provisioning and configuration
+bootstrap-devbox: $(ANSIBLE_BIN)
+	@echo "Starting Ansible (Phase 2: DevBox Provisioning)..."
+	@ANSIBLE_CONFIG=src/ansible/ansible.cfg $(ANSIBLE_BIN) src/ansible/playbooks/02-devbox-bootstrap.yaml --vault-id pve_core@prompt --vault-id management_plane@prompt
+	@echo "Phase 2 completed."
+
+# Day-0 Phase 2: Dry-run check for DevBox provisioning and configuration
+check-bootstrap-devbox: $(ANSIBLE_BIN)
+	@echo "DRY RUN: Checking DevBox provisioning."
+	@echo "Starting Ansible (Phase 2: DevBox Provisioning) in check mode..."
+	@ANSIBLE_CONFIG=src/ansible/ansible.cfg $(ANSIBLE_BIN) src/ansible/playbooks/02-devbox-bootstrap.yaml --vault-id pve_core@prompt --vault-id management_plane@prompt --check --diff
+	@echo "Phase 2 check completed."

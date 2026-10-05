@@ -20,6 +20,10 @@ jobs:
         with:
           go-version: 'stable'
 
+      - name: Warn about space indentation in Makefile
+        run: |
+          awk '/^ +(@|[a-zA-Z0-9-])/ { print "::warning file=Makefile,line=" NR "::[Line " NR "] Potential indentation issue (spaces instead of tabs): " $0 }' Makefile
+
       - name: Install checkmake
         run: go install github.com/checkmake/checkmake/cmd/checkmake@latest
 

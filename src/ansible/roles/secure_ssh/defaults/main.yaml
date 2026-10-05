@@ -1,0 +1,8 @@
+---
+# ==============================================================================
+# ROLE DEFAULT: secure_ssh
+# ==============================================================================
+# Determines the PermitRootLogin policy in sshd_config.
+# Enforces a "Secure by Default" posture by completely disabling root login for
+# standard virtual machines unless explicitly allowed by "prohibit-password" or "yes".
+ssh_permit_root_login: "no"

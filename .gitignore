@@ -43,6 +43,13 @@ terraform.rc
 # Uncomment the line below if you want to ignore planout files.
 # planout
 
+# Python virtual environment directories
+.venv/
+
 # Local environment variables and secrets (NEVER COMMIT)
 .env
 src/ansible/inventory/group_vars/all/vault.yaml
+src/ansible/inventory/group_vars/proxmox_cluster/vault.yaml
+src/ansible/inventory/group_vars/management_plane/vault.yaml
+proxmox_api_token.txt
+proxmox_api_token_tofu.txt

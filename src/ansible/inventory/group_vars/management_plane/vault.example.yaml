@@ -1,0 +1,4 @@
+---
+# To change:
+vault_devbox_alcambic_password: "PASTE_GENERATED_PASSWORD_HERE"
+vault_devbox_alcambic_salt: "PASTE_GENERATED_SALT_HERE"

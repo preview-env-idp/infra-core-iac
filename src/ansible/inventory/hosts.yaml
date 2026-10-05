@@ -5,3 +5,7 @@ all:
       hosts:
         pve-node-01:
           ansible_host: "{{ lookup('env', 'PVE_NODE_01_IP') }}"
+    management_plane:
+      hosts:
+        devbox_01:
+          ansible_host: "{{ lookup('env', 'DEVBOX_IP') }}"

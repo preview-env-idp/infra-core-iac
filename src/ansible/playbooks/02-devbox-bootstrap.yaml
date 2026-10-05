@@ -1,0 +1,113 @@
+---
+- name: "Day-0 Phase 2.1 - Provision Templates & DevBox KVM on Proxmox"
+  hosts: proxmox_cluster
+  run_once: true
+  vars_files:
+    - ../../../infrastructure_matrix.yaml
+  tags: [provision]
+  tasks:
+    - name: "Build Cloud-Init templates for defined architectures"
+      ansible.builtin.include_role:
+        name: pve_cloudinit_template
+      vars:
+        host_arch: "{{ item.key }}"
+        template_vmid: "{{ item.value.vmid }}"
+        template_storage_pool: "{{ storage_pool_type }}"
+      loop: "{{ pve_base_templates | dict2items }}"
+      when: item.value.vmid is defined
+
+    - name: "Ensure DevBox M2M SSH key pair exists locally"
+      community.crypto.openssh_keypair:
+        path: "{{ hostvars['devbox_01']['alcambic_devbox_m2m_key_path'] }}"
+        type: ed25519
+        comment: "alcambic-devbox-m2m"
+      delegate_to: localhost
+      become: false
+
+    - name: "Detect physical architecture of the target Proxmox node"
+      ansible.builtin.command: uname -m
+      register: pve_raw_arch
+      changed_when: false
+      become: false
+      check_mode: false
+
+    - name: "Map physical architecture to template naming convention"
+      ansible.builtin.set_fact:
+        devbox_target_arch: >-
+          {%- if pve_raw_arch.stdout in ['x86_64', 'amd64'] -%}amd64
+          {%- elif pve_raw_arch.stdout in ['aarch64', 'arm64'] -%}arm64
+          {%- else -%}unsupported{%- endif -%}
+
+    - name: "Validate cluster hardware architecture compatibility"
+      ansible.builtin.assert:
+        that:
+          - devbox_target_arch != 'unsupported'
+          - devbox_target_arch in pve_base_templates.keys()
+        fail_msg: |
+          [ARCHITECTURE FATAL] The target Proxmox node reported an unsupported CPU architecture: '{{ pve_raw_arch.stdout }}'.
+          This cluster automation strictly supports: {{ pve_base_templates.keys() | list | join(', ') }}.
+      delegate_to: localhost
+      run_once: true
+
+    - name: "Provision DevBox"
+      ansible.builtin.include_role:
+        name: pve_devbox_provisioning
+        apply:
+          delegate_to: localhost
+      vars:
+        devbox_api_user: "{{ pve_alcambic_tofu_user }}"
+        devbox_ip: "{{ hostvars['devbox_01']['ansible_host'] }}"
+        devbox_net_mask: "{{ management_subnet_cidr | split('/') | last }}"
+        devbox_gw_ip: "{{ management_subnet_gateway }}"
+        devbox_ssh_pubkey: "{{ lookup('file', hostvars['devbox_01']['alcambic_devbox_m2m_key_path'] ~ '.pub') }}"
+        devbox_template_name: "alcambic-debian13-cloudinit-template-{{ devbox_target_arch }}"
+        devbox_api_token_secret: "{{ vault_pve_api_tofu_token }}"
+        devbox_ci_password: "{{ hostvars['devbox_01']['vault_devbox_alcambic_password'] }}"
+        devbox_ci_salt: "{{ hostvars['devbox_01']['vault_devbox_alcambic_salt'] }}"
+
+- name: "Day-0 Phase 2.2 - Wait for DevBox SSH"
+  hosts: localhost
+  tags: [wait]
+  become: false
+  tasks:
+    - name: Wait for DevBox to listen on port 22
+      ansible.builtin.wait_for:
+        host: "{{ hostvars['devbox_01']['ansible_host'] }}"
+        port: 22
+        state: started
+        delay: 10
+        timeout: 120
+      when: not ansible_check_mode
+
+- name: "Day-0 Phase 2.3 - DevBox Configuration & Tooling"
+  hosts: devbox_01
+  tags: [configure]
+  pre_tasks:
+    - name: "Connection Gate: Test SSH reachability"
+      ansible.builtin.ping:
+      ignore_unreachable: true
+      register: host_ping
+
+    - name: "Connection Gate: Gracefully end play if host is dead during Check Mode"
+      ansible.builtin.meta: end_host
+      when:
+        - ansible_check_mode
+        - host_ping.unreachable is defined and host_ping.unreachable
+
+    - name: "Connection Gate: Fail hard if host is dead during normal execution"
+      ansible.builtin.fail:
+        msg: "[PIPELINE FATAL] SSH connection failed. Phase 2.1 likely failed to boot the VM."
+      when:
+        - not ansible_check_mode
+        - host_ping.unreachable is defined and host_ping.unreachable
+  roles:
+    - secure_ssh
+    # - role: devbox_packages
+      # vars:
+        # to be developed
+    # - role: opentofu_setup
+      # vars:
+        # to be developed
+    # - role: to be developed: remove ssh keys from root after proxmox gave them in cloud-init
+    # - role: to be developed: disable loging to root account & by ssh (likely in ssh hardening role)
+    # - role: to be developed: set firewall
