@@ -106,7 +106,7 @@
   become: false
   when: devbox_match | length == 0
 
-- name: "DevBox: Phase 2 - Configure & Start KVM Instance"
+- name: "DevBox: Phase 2 - Configure KVM Instance via API"
   community.proxmox.proxmox_kvm:
     api_host: "{{ ansible_host }}"
     api_user: "{{ devbox_api_user }}"
@@ -130,6 +130,19 @@
     ipconfig:
       ipconfig0: "ip={{ devbox_ip }}/{{ devbox_net_mask }},gw={{ devbox_gw_ip }}"
     sshkeys: "{{ devbox_ssh_pubkey }}"
+    state: present
+  delegate_to: localhost
+  become: false
+
+- name: "DevBox: Phase 3 - Start KVM Instance via API"
+  community.proxmox.proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ devbox_api_user }}"
+    api_token_id: "{{ devbox_api_token_id }}"
+    api_token_secret: "{{ devbox_api_token_secret }}"
+    validate_certs: false
+    node: "{{ pve_node_hostname }}"
+    vmid: "{{ resolved_vmid }}"
     state: started
   delegate_to: localhost
   become: false
