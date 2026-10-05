@@ -105,6 +105,7 @@
   delegate_to: localhost
   become: false
   when: devbox_match | length == 0
+  register: vm_clone_result
 
 - name: "DevBox: Phase 2 - Configure KVM Instance via API"
   community.proxmox.proxmox_kvm:
@@ -123,8 +124,8 @@
     boot: c
     bootdisk: scsi0
     onboot: true
-    ciuser: "{{ devbox_ci_user }}"
-    cipassword: "{{ devbox_ci_password | password_hash('sha512', devbox_ci_salt) }}"
+    ciuser: "{{ devbox_ci_user if (vm_clone_result.changed | default(false)) else omit}}"
+    cipassword: "{{ devbox_ci_password | password_hash('sha512', devbox_ci_salt) if (vm_clone_result.changed | default(false)) else omit}}"
     net:
       net0: "virtio,bridge={{ devbox_net_bridge }}"
     ipconfig:
