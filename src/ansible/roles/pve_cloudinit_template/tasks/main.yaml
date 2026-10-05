@@ -1,6 +1,6 @@
 ---
 - name: "CloudInit: Verify virt-customize binary is present in path"
-  ansible.builtin.command: command -v virt-customize
+  ansible.builtin.shell: command -v virt-customize
   register: virt_customize_check
   changed_when: false
   failed_when: false
