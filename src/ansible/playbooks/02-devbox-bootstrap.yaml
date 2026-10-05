@@ -108,3 +108,6 @@
     # - role: opentofu_setup
       # vars:
         # to be developed
+    # - role: to be developed: remove ssh keys from root after proxmox gave them in cloud-init
+    # - role: to be developed: disable loging to root account & by ssh (likely in ssh hardening role)
+    # - role: to be developed: set firewall
