@@ -10,6 +10,12 @@
 
 - name: "Day-0 Phase 1.2: Proxmox VE Configuration & Hardening"
   hosts: proxmox_cluster
+  pre_tasks:
+    - name: "Host Dependencies: Ensure libguestfs-tools is installed (provides virt-customize)"
+      ansible.builtin.apt:
+        name: libguestfs-tools
+        state: present
+        update_cache: true
   roles:
     - role: secure_ssh
       vars:

@@ -26,9 +26,11 @@ template_vm_cpu_type: "host"
 # The default underlay network bridge.
 template_vm_network_bridge: "vmbr0"
 
-# CRITICAL: Must be an LVM-Thin or ZFS pool. Standard directory/ext4 storage
-# DOES NOT support instantaneous snapshots and Linked Clones.
+# The default storage pool for the immutable template.
 template_storage_pool: "local-lvm"
+
+# Api used to make cloud-init network configuration.
+template_net_renderer: "networkd"
 
 # 4. Upstream Artifact Verification (GitOps Source of Truth)
 # The absolute path to the Debian cloud image registry. If you want to bump
