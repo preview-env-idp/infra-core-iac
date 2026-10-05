@@ -1,21 +1,4 @@
 ---
-- name: "CloudInit: Verify virt-customize binary is present in path"
-  ansible.builtin.shell: command -v virt-customize
-  register: virt_customize_check
-  changed_when: false
-  failed_when: false
-  check_mode: false
-
-- name: "CloudInit: Fail if virt-customize dependency is missing"
-  ansible.builtin.assert:
-    that:
-      - virt_customize_check.rc == 0
-    fail_msg: |
-      [DEPENDENCY FATAL] 'virt-customize' command not found.
-      This tool is required to securely inject declarative network policies into future templates.
-      Ensure the 'guestfs-tools' package is installed on the Proxmox cluster nodes.
-  check_mode: false
-
 - name: "CloudInit: Fetch checksums manifest for upstream image"
   ansible.builtin.uri:
     url: "{{ template_upstream_base_url }}/SHA512SUMS"
@@ -69,13 +52,6 @@
     mode: '0644'
     checksum: "sha512:{{ upstream_sha512 }}"
   when: provision_required
-
-- name: "CloudInit: Force secure network renderer policy inside Golden Image"
-  ansible.builtin.command: >
-    virt-customize -a /tmp/{{ template_upstream_filename }}
-    --run-command "echo 'system_info:\n  network:\n    renderers: [\"{{ template_net_renderer }}\"]' > /etc/cloud/cloud.cfg.d/99-network-policy.cfg"
-  when: provision_required
-  changed_when: true
 
 - name: "CloudInit: Provision base VM and import disk atomically"
   ansible.builtin.command: >

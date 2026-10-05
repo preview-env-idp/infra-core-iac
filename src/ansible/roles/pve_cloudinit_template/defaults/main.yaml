@@ -29,9 +29,6 @@ template_vm_network_bridge: "vmbr0"
 # The default storage pool for the immutable template.
 template_storage_pool: "local-lvm"
 
-# Api used to make cloud-init network configuration.
-template_net_renderer: "networkd"
-
 # 4. Upstream Artifact Verification (GitOps Source of Truth)
 # The absolute path to the Debian cloud image registry. If you want to bump
 # the OS version (e.g., to Debian 14), update these variables.
